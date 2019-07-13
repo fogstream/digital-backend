@@ -1,0 +1,124 @@
+image: docker:latest
+
+variables:
+  DOCKER_DRIVER: overlay
+  # Имена образов с приложением
+  APP_BRANCH_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  APP_MASTER_IMAGE: $CI_REGISTRY_IMAGE:master
+  APP_LATEST_IMAGE: $CI_REGISTRY_IMAGE:latest
+  # Имена образов с nginx
+  NGINX_BRANCH_IMAGE: $CI_REGISTRY_IMAGE/nginx:$CI_COMMIT_REF_SLUG
+  NGINX_MASTER_IMAGE: $CI_REGISTRY_IMAGE/nginx:master
+  NGINX_LATEST_IMAGE: $CI_REGISTRY_IMAGE/nginx:latest
+
+services:
+  - docker:dind
+
+stages:
+  - build
+  - lint
+  - test
+  - release
+
+.registry-login: &registry-login
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+
+#### nginx ####
+# Сборка образа с nginx из ветки.
+build-nginx-image:
+  stage: build
+  <<: *registry-login
+  script:
+    # Чтобы не собирать образ с нуля, подгрузим предыдущую версию образа, чтобы
+    # использовать его как кэш.
+    # см. https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#making-docker-in-docker-builds-faster-with-docker-layer-caching
+    - docker pull $NGINX_MASTER_IMAGE || true
+    - docker build
+      --cache-from $NGINX_MASTER_IMAGE
+      -t $NGINX_BRANCH_IMAGE
+      -f ./compose/nginx/Dockerfile .
+    - docker push $NGINX_BRANCH_IMAGE
+  only:
+    - master
+    - dev
+    - merge_requests
+
+# При изменении master тегаем образ из нее как latest
+release-nginx-image:
+  stage: release
+  <<: *registry-login
+  script:
+    - docker pull $NGINX_BRANCH_IMAGE
+    - docker tag $NGINX_BRANCH_IMAGE $NGINX_LATEST_IMAGE
+    - docker push $NGINX_LATEST_IMAGE
+  only:
+    - master
+
+#### Django проект ####
+
+# Сборка образа с приложением из ветки.
+build-app-image:
+  stage: build
+  <<: *registry-login
+  script:
+    # Чтобы не собирать образ с нуля, подгрузим предыдущую версию образа, чтобы
+    # использовать его как кэш.
+    # см. https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#making-docker-in-docker-builds-faster-with-docker-layer-caching
+    - docker pull $APP_MASTER_IMAGE || true
+    - docker build
+      --cache-from $APP_MASTER_IMAGE
+      -t $APP_BRANCH_IMAGE
+      -f ./compose/app/Dockerfile .
+    - docker push $APP_BRANCH_IMAGE
+  only:
+    - master
+    - dev
+    - merge_requests
+
+pylint:
+  stage: lint
+  image: $APP_BRANCH_IMAGE
+  script:
+    - pylint --rcfile=.pylintrc --output-format=text ./digital_backend | tee pylint.txt
+    - score=$(sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' pylint.txt)
+    - echo "Pylint score was $score"
+    - anybadge --value=$score --file=pylint.svg pylint
+  artifacts:
+    paths:
+      - pylint.svg
+  only:
+    - master
+    - dev
+    - merge_requests
+
+isort:
+  stage: lint
+  image: $APP_BRANCH_IMAGE
+  script:
+    - isort --check-only -rc .
+  only:
+    - master
+    - dev
+    - merge_requests
+
+pytest:
+  stage: test
+  image: $APP_BRANCH_IMAGE
+  script:
+    - pytest --cov-config .coveragerc --cov=.
+  only:
+    - master
+    - dev
+    - merge_requests
+
+# При изменении master тегаем образ из нее как latest
+release-app-image:
+  stage: release
+  <<: *registry-login
+  script:
+    - docker pull $APP_BRANCH_IMAGE
+    - docker tag $APP_BRANCH_IMAGE $APP_LATEST_IMAGE
+    - docker push $APP_LATEST_IMAGE
+  only:
+    - master

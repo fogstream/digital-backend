@@ -1,0 +1,77 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-07-13 22:11+1000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n"
+"%100>=11 && n%100<=14)? 2 : 3);\n"
+
+#: digital_backend/apps/criteria/models.py:19
+msgid "criterion"
+msgstr "критерий"
+
+#: digital_backend/apps/criteria/models.py:20
+msgid "criteria"
+msgstr "критерии"
+
+#: digital_backend/apps/suppliers/models.py:15
+msgid "supplier type"
+msgstr "тип контрагента"
+
+#: digital_backend/apps/suppliers/models.py:16
+msgid "suppliers types"
+msgstr "типы контрагентов"
+
+#: digital_backend/apps/suppliers/models.py:35
+msgid "supplier"
+msgstr "контрагент"
+
+#: digital_backend/apps/suppliers/models.py:36
+msgid "suppliers"
+msgstr "контрагенты"
+
+#: digital_backend/apps/suppliers/models.py:53
+msgid "buyer"
+msgstr ""
+
+#: digital_backend/apps/suppliers/models.py:59
+msgid "tender"
+msgstr "тендер"
+
+#: digital_backend/apps/suppliers/models.py:60
+msgid "tenders"
+msgstr "тендеры"
+
+#: digital_backend/apps/suppliers/models.py:73
+msgid "tender member"
+msgstr "участник тендера"
+
+#: digital_backend/apps/suppliers/models.py:74
+msgid "tender members"
+msgstr "участники тендера"
+
+#: digital_backend/apps/suppliers/models.py:88
+msgid "check result"
+msgstr "результат проверки"
+
+#: digital_backend/apps/suppliers/models.py:89
+msgid "check results"
+msgstr "результаты проверки"
+
+#: digital_backend/apps/suppliers/models.py:95
+msgid "score can not be greater criterion weight"
+msgstr ""
